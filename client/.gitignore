@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Auto-generated type declarations
+auto-imports.d.ts
+components.d.ts
+tsconfig.app.tsbuildinfo
+tsconfig.node.tsbuildinfo
+
+# Environment variables
+.env
