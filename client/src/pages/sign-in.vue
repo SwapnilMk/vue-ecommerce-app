@@ -90,8 +90,9 @@
     try {
       await authStore.signIn(event.data)
       router.push('/')
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
+      alert(error.message)
     } finally {
       loading.value = false
     }

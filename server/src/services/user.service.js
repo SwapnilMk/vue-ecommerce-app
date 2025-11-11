@@ -71,4 +71,33 @@ const createUserService = async (data) => {
     };
 };
 
-module.exports = { createUserService };
+
+
+const loginUserService = async ({ email, password }) => {
+    const user = await User.findOne({ email }).select("+password")
+    if (!user) throw new Error("Invalid email or password")
+
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) throw new Error("Invalid email or password")
+
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" })
+
+    return {
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+            addressLine1: user.addressLine1,
+            addressLine2: user.addressLine2,
+            city: user.city,
+            state: user.state,
+            postalCode: user.postalCode,
+            country: user.country,
+        },
+        token,
+    }
+}
+
+module.exports = { createUserService, loginUserService };

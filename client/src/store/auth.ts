@@ -28,25 +28,20 @@ interface SignInCredentials {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  // State
   const token = ref<string | null>(localStorage.getItem('token'))
   const user = ref<User | null>(JSON.parse(localStorage.getItem('user') || 'null'))
+
   const isAuthenticated = computed(() => !!token.value && !!user.value)
 
-  // signup
   async function signUp(credentials: SignUpCredentials) {
-    const response = await fetch('/api/v1/users', {
+    const response = await fetch('http://localhost:5000/api/v1/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
     })
 
     const data = await response.json()
-
-    if (!response.ok) {
-      const message = data.errors ? data.errors[0].message : data.message || 'Sign-up failed'
-      throw new Error(message)
-    }
+    if (!response.ok) throw new Error(data.message || 'Sign-up failed')
 
     token.value = data.token
     user.value = data.user
@@ -55,20 +50,15 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('user', JSON.stringify(data.user))
   }
 
-  // signin
   async function signIn(credentials: SignInCredentials) {
-    const response = await fetch('/api/v1/auth/login', {
+    const response = await fetch('http://localhost:5000/api/v1/users/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
     })
 
     const data = await response.json()
-
-    if (!response.ok) {
-      const message = data.errors ? data.errors[0].message : data.message || 'Sign-in failed'
-      throw new Error(message)
-    }
+    if (!response.ok) throw new Error(data.message || 'Sign-in failed')
 
     token.value = data.token
     user.value = data.user
@@ -77,7 +67,6 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('user', JSON.stringify(data.user))
   }
 
-  // sign out
   function signOut() {
     token.value = null
     user.value = null
@@ -85,12 +74,9 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('user')
   }
 
-  return {
-    token,
-    user,
-    isAuthenticated,
-    signUp,
-    signIn,
-    signOut,
+  function getAuthHeader() {
+    return token.value ? { Authorization: `Bearer ${token.value}` } : {}
   }
+
+  return { token, user, isAuthenticated, signUp, signIn, signOut, getAuthHeader }
 })

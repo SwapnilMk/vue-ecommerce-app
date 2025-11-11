@@ -18,6 +18,24 @@ const routes = [
         component: () => import('../pages/product/[id].vue'),
         props: true,
       },
+      {
+        path: '/orders',
+        name: 'Orders',
+        component: () => import('../pages/orders.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/profile',
+        name: 'Profile',
+        component: () => import('../pages/profile.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/settings',
+        name: 'Settings',
+        component: () => import('../pages/settings.vue'),
+        meta: { requiresAuth: true },
+      },
     ],
   },
 

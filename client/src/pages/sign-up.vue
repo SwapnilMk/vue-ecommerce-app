@@ -1,14 +1,11 @@
 <template>
   <UContainer class="py-12">
     <UCard class="max-w-3xl mx-auto">
-      <!-- Header -->
       <template #header>
         <h2 class="text-2xl font-semibold text-center">Create your account</h2>
       </template>
 
-      <!-- Signup Form -->
       <UForm :schema="schema" :state="state" class="space-y-3" @submit="onSubmit">
-        <!-- Full Name -->
         <UFormField label="Full Name" name="name" required>
           <UInput
             v-model="state.name"
@@ -18,7 +15,6 @@
           />
         </UFormField>
 
-        <!-- Email + Phone -->
         <div class="flex flex-col sm:flex-row gap-0 sm:gap-2">
           <UFormField label="Email" name="email" class="flex-1" required>
             <UInput
@@ -40,7 +36,6 @@
           </UFormField>
         </div>
 
-        <!-- Address Line 1 -->
         <UFormField label="Address Line 1" name="addressLine1">
           <UInput
             v-model="state.addressLine1"
@@ -50,7 +45,6 @@
           />
         </UFormField>
 
-        <!-- Address Line 2 + City -->
         <div class="flex flex-col sm:flex-row gap-0 sm:gap-2">
           <UFormField label="Address Line 2" name="addressLine2" class="flex-1">
             <UInput
@@ -65,7 +59,6 @@
           </UFormField>
         </div>
 
-        <!-- State + Postal Code + Country -->
         <div class="flex flex-col sm:flex-row gap-0 sm:gap-2">
           <UFormField label="State" name="state" class="flex-1">
             <UInput v-model="state.state" placeholder="NY" class="w-full" />
@@ -78,7 +71,6 @@
           </UFormField>
         </div>
 
-        <!-- Password + Confirm Password -->
         <div class="flex flex-col sm:flex-row gap-0 sm:gap-2">
           <UFormField label="Password" name="password" class="flex-1" required>
             <UInput
@@ -192,14 +184,14 @@
   const router = useRouter()
   const authStore = useAuthStore()
 
-  // ✅ Handle form submission
   async function onSubmit(event: FormSubmitEvent<Schema>) {
     loading.value = true
     try {
       await authStore.signUp(event.data)
       router.push('/')
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
+      alert(error.message)
     } finally {
       loading.value = false
     }
