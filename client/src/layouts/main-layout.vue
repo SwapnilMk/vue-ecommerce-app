@@ -20,7 +20,7 @@
         </UButton>
 
         <div v-if="isAuthenticated">
-          <UDropdownMenu :items="menuItems" @select="handleSelect">
+          <UDropdownMenu :items="items">
             <UAvatar :src="userAvatar" size="md" class="cursor-pointer" />
           </UDropdownMenu>
         </div>
@@ -46,12 +46,13 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch, nextTick } from 'vue'
-  import { useRouter } from 'vue-router'
+  import { computed } from 'vue'
   import { useAuthStore } from '../store/auth'
+  import type { DropdownMenuItem } from '@nuxt/ui'
   import { useCartStore } from '../store/cart'
 
-  const router = useRouter()
+  import { User, ShoppingBag, Settings } from 'lucide-vue-next'
+
   const authStore = useAuthStore()
   const cartStore = useCartStore()
 
@@ -62,54 +63,19 @@
     () => `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.value?.name || 'user'}`
   )
 
-  // Define dropdown items with keys (no inline click handlers)
-  const menuItems = ref<any[]>([])
-
-  watch(
-    isAuthenticated,
-    (loggedIn) => {
-      if (loggedIn) {
-        menuItems.value = [
-          [
-            {
-              label: user.value?.name || 'User',
-              sublabel: user.value?.email || '',
-              avatar: { src: userAvatar.value },
-              type: 'label',
-              key: 'user',
-            },
-          ],
-          [
-            { label: 'Profile', icon: 'i-lucide-user', key: 'profile' },
-            { label: 'Orders', icon: 'i-lucide-shopping-bag', key: 'orders' },
-            { label: 'Settings', icon: 'i-lucide-cog', key: 'settings' },
-          ],
-          [{ label: 'Logout', icon: 'i-lucide-log-out', key: 'logout' }],
-        ]
-      } else {
-        menuItems.value = []
-      }
-    },
-    { immediate: true }
-  )
-
-  // handle navigation centrally
-  async function handleSelect(item: any) {
-    await nextTick() // ensure dropdown closes first
-    switch (item.key) {
-      case 'profile':
-        router.push('/profile')
-        break
-      case 'orders':
-        router.push('/orders')
-        break
-      case 'settings':
-        router.push('/settings')
-        break
-      case 'logout':
-        authStore.signOut()
-        router.push('/sign-in')
-        break
-    }
-  }
+  const items = computed<DropdownMenuItem[][]>(() => [
+    [
+      {
+        label: user.value?.name || 'User',
+        sublabel: user.value?.email || '',
+        avatar: { src: userAvatar.value },
+        disabled: true,
+      },
+    ],
+    [
+      { label: 'Profile', icon: User, to: '/profile' },
+      { label: 'Orders', icon: ShoppingBag, to: '/orders' },
+      { label: 'Settings', icon: Settings, to: '/settings' },
+    ],
+  ])
 </script>

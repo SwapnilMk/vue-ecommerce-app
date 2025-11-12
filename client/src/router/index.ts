@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../store/auth'
 
 const routes = [
   // main routes
@@ -49,6 +50,25 @@ const routes = [
     ],
   },
 
+  // Admin Dashboard (Protected)
+  {
+    path: '/dashboard',
+    component: () => import('../layouts/dashboard-layout.vue'),
+    meta: { requiresAuth: false, requiresAdmin: false },
+    children: [
+      {
+        path: '',
+        name: 'DashboardHome',
+        component: () => import('../pages/dashboard/dashboard-home.vue'),
+      },
+      {
+        path: 'customers',
+        name: 'DashboardCustomers',
+        component: () => import('../pages/dashboard/customers.vue'),
+      },
+    ],
+  },
+
   // 404 Page
   {
     path: '/:pathMatch(.*)*',
@@ -60,6 +80,25 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+// ✅ Global Navigation Guard
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin)
+
+  // Not logged in
+  if (requiresAuth && !authStore.isAuthenticated) {
+    return next({ name: 'SignIn' })
+  }
+
+  // Admin-only route protection
+  if (requiresAdmin && authStore.user?.role !== 'ADMIN') {
+    return next({ name: 'Home' }) // redirect non-admins
+  }
+
+  next()
 })
 
 export default router
