@@ -36,7 +36,7 @@
       </aside>
 
       <!-- Main Content -->
-      <div class="flex flex-col flex-1 min-h-screen">
+      <div class="flex flex-col flex-1 min-h-screen min-w-0">
         <!-- Header -->
         <header
           class="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4 py-3 sticky top-0 bg-white dark:bg-gray-950 z-30"
@@ -98,6 +98,7 @@
   const navItems = [
     { label: 'Overview', to: '/dashboard', icon: 'i-lucide-home' },
     { label: 'Customers', to: '/dashboard/customers', icon: 'i-lucide-users' },
+    { label: 'Products', to: '/dashboard/products', icon: 'i-lucide-package' },
     { label: 'Orders', to: '/dashboard/orders', icon: 'i-lucide-shopping-bag' },
     { label: 'Settings', to: '/dashboard/settings', icon: 'i-lucide-cog' },
   ]
@@ -135,12 +136,3 @@
     }
   }
 </script>
-
-<style scoped>
-  @media (min-width: 768px) {
-    aside {
-      position: relative !important;
-      transform: none !important;
-    }
-  }
-</style>

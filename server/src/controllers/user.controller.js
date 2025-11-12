@@ -1,4 +1,4 @@
-const { createUserService, loginUserService } = require("../services/user.service");
+const { createUserService, loginUserService } = require("../services/user.service.js");
 
 
 const createUser = async (req, res) => {

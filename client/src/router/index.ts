@@ -66,6 +66,16 @@ const routes = [
         name: 'DashboardCustomers',
         component: () => import('../pages/dashboard/customers.vue'),
       },
+      {
+        path: 'products',
+        name: 'DashboardProducts',
+        component: () => import('../pages/products.vue'),
+      },
+      {
+        path: 'orders',
+        name: 'DashboardOrders',
+        component: () => import('../pages/orders.vue'),
+      },
     ],
   },
 

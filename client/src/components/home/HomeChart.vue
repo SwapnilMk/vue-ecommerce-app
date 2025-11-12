@@ -84,7 +84,7 @@
       </div>
     </template>
 
-    <VisXYContainer :data="data" :padding="{ top: 40 }" class="h-96" :width="width">
+    <VisXYContainer :data="data" :padding="{ top: 40 }" class="h-64 sm:h-96" :width="width">
       <VisLine :x="x" :y="y" color="var(--ui-primary)" />
       <VisArea :x="x" :y="y" color="var(--ui-primary)" :opacity="0.1" />
 
