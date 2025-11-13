@@ -96,7 +96,6 @@
     { label: 'Customers', to: '/dashboard/customers', icon: 'i-lucide-users' },
     { label: 'Products', to: '/dashboard/products', icon: 'i-lucide-package' },
     { label: 'Orders', to: '/dashboard/orders', icon: 'i-lucide-shopping-bag' },
-    { label: 'Settings', to: '/dashboard/settings', icon: 'i-lucide-cog' },
   ]
 
   const menuItems = [

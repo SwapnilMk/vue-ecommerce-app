@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { computed, useTemplateRef, ref, watch } from 'vue'
-  import { format, startOfDay, endOfDay } from 'date-fns'
+  import { format } from 'date-fns'
   import { VisXYContainer, VisLine, VisAxis, VisArea, VisCrosshair, VisTooltip } from '@unovis/vue'
   import { useElementSize } from '@vueuse/core'
   import api from '../../api'

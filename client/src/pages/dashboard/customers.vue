@@ -25,7 +25,7 @@
     try {
       const response = await api.get('/users')
       data.value = response.data.users.map((user: any) => ({
-        id: user._id, // Keep id for actions, but not displayed
+        id: user._id, 
         name: user.name,
         email: user.email,
         role: user.role,

@@ -91,11 +91,6 @@ const routes = [
         name: 'DashboardOrders',
         component: () => import('../pages/dashboard/orders.vue'),
       },
-      {
-        path: 'settings',
-        name: 'DashboardSettings',
-        component: () => import('../pages/dashboard/settings.vue'),
-      },
     ],
   },
 

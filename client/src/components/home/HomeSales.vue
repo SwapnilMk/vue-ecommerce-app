@@ -11,8 +11,8 @@
   async function fetchRecentOrders() {
     try {
       const response = await api.get('/orders/all', { params: { limit: 5 } })
-      data.value = response.data.orders.map((order) => ({
-        name: order.user.name, // Map user.name instead of id
+      data.value = response.data.orders.map((order:any) => ({
+        name: order.user.name,
         date: order.createdAt,
         status: order.paymentStatus.toLowerCase(),
         email: order.user.email,
