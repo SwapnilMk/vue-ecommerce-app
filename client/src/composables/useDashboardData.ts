@@ -10,7 +10,7 @@ export const useDashboardData = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/v1/dashboard', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/dashboard`, {
         headers: {
           ...authStore.getAuthHeader(),
         },

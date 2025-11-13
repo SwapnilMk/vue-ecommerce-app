@@ -1,5 +1,6 @@
 const allowedOrigins = [
-  "http://localhost:5173",     
+  "http://localhost:5173",  
+  "https://ecommerce-app-vue.vercel.app"
 ];
 
 
