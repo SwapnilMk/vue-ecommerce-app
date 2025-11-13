@@ -1,40 +1,46 @@
-const User = require("../models/user.model.js");
+const Cart = require("../models/cart.model.js");
 const Product = require("../models/product.model.js");
 
 // Add to cart
 const addToCartService = async (userId, productId, qty = 1) => {
-    const user = await User.findById(userId);
     const product = await Product.findById(productId);
-
     if (!product) throw new Error("Product not found");
 
-    let item = user.cart?.find((i) => i.product.toString() === productId);
+    let cart = await Cart.findOne({ user: userId });
 
-    if (item) {
-        item.quantity += qty;
+    if (cart) {
+        const itemIndex = cart.items.findIndex((p) => p.product.toString() === productId);
+        if (itemIndex > -1) {
+            cart.items[itemIndex].quantity += qty;
+        } else {
+            cart.items.push({ product: productId, quantity: qty });
+        }
     } else {
-        user.cart.push({ product: productId, quantity: qty });
+        cart = await Cart.create({
+            user: userId,
+            items: [{ product: productId, quantity: qty }],
+        });
     }
-
-    await user.save();
-
-    return { cart: user.cart };
+    await cart.save();
+    return { cart };
 };
 
 // Remove item
 const removeCartItemService = async (userId, productId) => {
-    const user = await User.findById(userId);
+    const cart = await Cart.findOne({ user: userId });
+    if (!cart) throw new Error("Cart not found");
 
-    user.cart = user.cart.filter((i) => i.product.toString() !== productId);
-    await user.save();
+    cart.items = cart.items.filter((i) => i.product.toString() !== productId);
+    await cart.save();
 
-    return { cart: user.cart };
+    return { cart };
 };
 
 // Get cart
 const getCartService = async (userId) => {
-    const user = await User.findById(userId).populate("cart.product");
-    return { cart: user.cart };
+    const cart = await Cart.findOne({ user: userId }).populate("items.product");
+    if (!cart) throw new Error("Cart not found");
+    return { cart };
 };
 
 module.exports = {

@@ -1,4 +1,4 @@
-const { createUserService, loginUserService } = require("../services/user.service.js");
+const { createUserService, loginUserService, getAllUsersService } = require("../services/user.service.js");
 
 
 const createUser = async (req, res) => {
@@ -36,4 +36,22 @@ const loginUser = async (req, res) => {
     }
 }
 
-module.exports = { createUser, loginUser };
+const getAllUsers = async (req, res) => {
+    try {
+        const result = await getAllUsersService();
+
+        res.status(200).json({
+            success: true,
+            message: "Users retrieved successfully",
+            ...result,
+        });
+    } catch (error) {
+        console.error("Error fetching users:", error.message);
+        res.status(400).json({
+            success: false,
+            message: error.message || "Server error",
+        });
+    }
+};
+
+module.exports = { createUser, loginUser, getAllUsers };

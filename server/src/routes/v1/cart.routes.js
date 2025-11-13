@@ -7,10 +7,10 @@ const {
     getCart,
 } = require("../../controllers/cart.controller.js");
 
-const { isUser } = require("../../middleware/auth.middleware.js");
+const { protect, isUser } = require("../../middleware/auth.middleware.js");
 
-router.get("/", isUser, getCart);
-router.post("/:productId", isUser, addToCart);
-router.delete("/:productId", isUser, removeFromCart);
+router.get("/", protect, isUser, getCart);
+router.post("/:productId", protect, isUser, addToCart);
+router.delete("/:productId", protect, isUser, removeFromCart);
 
 module.exports = router;
