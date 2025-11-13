@@ -1,80 +1,48 @@
 <script setup lang="ts">
-  import { ref, watch } from 'vue'
-  import { randomInt } from '../../utils'
-  import type { Period, Range, Stat } from '../../types'
+  import { useDashboardData } from '../../composables/useDashboardData'
+  import { computed } from 'vue'
 
-  const props = defineProps<{
-    period: Period
-    range: Range
-  }>()
+  const { dashboardData, loading, error } = useDashboardData()
 
-  function formatCurrency(value: number): string {
-    return value.toLocaleString('en-US', {
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      maximumFractionDigits: 0,
-    })
+    }).format(value)
   }
 
-  const baseStats = [
+  const stats = computed(() => [
     {
       title: 'Customers',
       icon: 'i-lucide-users',
-      minValue: 400,
-      maxValue: 1000,
-      minVariation: -15,
-      maxVariation: 25,
+      value: dashboardData.value?.totalUsers || 0,
+      variation: 0,
     },
     {
-      title: 'Conversions',
-      icon: 'i-lucide-chart-pie',
-      minValue: 1000,
-      maxValue: 2000,
-      minVariation: -10,
-      maxVariation: 20,
-    },
-    {
-      title: 'Revenue',
-      icon: 'i-lucide-circle-dollar-sign',
-      minValue: 200000,
-      maxValue: 500000,
-      minVariation: -20,
-      maxVariation: 30,
-      formatter: formatCurrency,
+      title: 'Products',
+      icon: 'i-lucide-box',
+      value: dashboardData.value?.totalProducts || 0,
+      variation: 0,
     },
     {
       title: 'Orders',
       icon: 'i-lucide-shopping-cart',
-      minValue: 100,
-      maxValue: 300,
-      minVariation: -5,
-      maxVariation: 15,
+      value: dashboardData.value?.totalOrders || 0,
+      variation: 0,
     },
-  ]
-
-  const stats = ref<Stat[]>([])
-
-  watch(
-    [() => props.period, () => props.range],
-    () => {
-      stats.value = baseStats.map((stat) => {
-        const value = randomInt(stat.minValue, stat.maxValue)
-        const variation = randomInt(stat.minVariation, stat.maxVariation)
-
-        return {
-          title: stat.title,
-          icon: stat.icon,
-          value: stat.formatter ? stat.formatter(value) : value,
-          variation,
-        }
-      })
+    {
+      title: 'Revenue',
+      icon: 'i-lucide-circle-dollar-sign',
+      value: formatCurrency(dashboardData.value?.totalRevenue || 0),
+      variation: 0,
     },
-    { immediate: true }
-  )
+  ])
 </script>
 
 <template>
-  <UPageGrid class="lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-px">
+  <div v-if="loading">Loading...</div>
+  <div v-else-if="error">{{ error }}</div>
+  <UPageGrid v-else class="lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-px">
     <UPageCard
       v-for="(stat, index) in stats"
       :key="index"

@@ -4,6 +4,9 @@
   import { VisXYContainer, VisLine, VisAxis, VisArea, VisCrosshair, VisTooltip } from '@unovis/vue'
   import { useElementSize } from '@vueuse/core'
   import type { Period, Range } from '../../types'
+  import { useDashboardData } from '../../composables/useDashboardData'
+
+  const { dashboardData, loading, error } = useDashboardData()
 
   const cardRef = useTemplateRef<HTMLElement | null>('cardRef')
 
@@ -22,8 +25,10 @@
   const data = ref<DataRecord[]>([])
 
   watch(
-    [() => props.period, () => props.range],
+    [() => props.period, () => props.range, () => dashboardData.value],
     () => {
+      if (!dashboardData.value) return
+
       const dates = (
         {
           daily: eachDayOfInterval,
@@ -32,13 +37,14 @@
         } as Record<Period, typeof eachDayOfInterval>
       )[props.period](props.range)
 
-      const min = 1000
-      const max = 10000
-
-      data.value = dates.map((date) => ({
-        date,
-        amount: Math.floor(Math.random() * (max - min + 1)) + min,
-      }))
+      data.value = dates.map((date) => {
+        const month = date.getMonth() + 1
+        const orderData = dashboardData.value.ordersByMonth.find((d) => d._id === month)
+        return {
+          date,
+          amount: orderData ? orderData.count : 0,
+        }
+      })
     },
     { immediate: true }
   )
@@ -70,16 +76,18 @@
     return formatDate(data.value[i].date)
   }
 
-  const template = (d: DataRecord) => `${formatDate(d.date)}: ${formatNumber(d.amount)}`
+  const template = (d: DataRecord) => `${formatDate(d.date)}: ${d.amount} orders`
 </script>
 
 <template>
-  <UCard ref="cardRef" :ui="{ root: 'overflow-visible', body: '!px-0 !pt-0 !pb-3' }">
+  <div v-if="loading">Loading...</div>
+  <div v-else-if="error">{{ error }}</div>
+  <UCard v-else ref="cardRef" :ui="{ root: 'overflow-visible', body: '!px-0 !pt-0 !pb-3' }">
     <template #header>
       <div>
-        <p class="text-xs text-muted uppercase mb-1.5">Revenue</p>
+        <p class="text-xs text-muted uppercase mb-1.5">Orders</p>
         <p class="text-3xl text-highlighted font-semibold">
-          {{ formatNumber(total) }}
+          {{ total }}
         </p>
       </div>
     </template>

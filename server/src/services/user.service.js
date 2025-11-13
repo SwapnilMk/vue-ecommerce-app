@@ -100,4 +100,9 @@ const loginUserService = async ({ email, password }) => {
     }
 }
 
-module.exports = { createUserService, loginUserService };
+const getAllUsersService = async () => {
+    const users = await User.find({});
+    return { users };
+};
+
+module.exports = { createUserService, loginUserService, getAllUsersService };

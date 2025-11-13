@@ -9,21 +9,21 @@ const {
     updateOrderToDelivered,
 } = require("../../controllers/order.controller.js");
 
-const { isUser, isAdmin } = require("../../middleware/auth.middleware.js");
+const { protect, isAdmin, isUser } = require("../../middleware/auth.middleware.js");
 
 // Admin: Get all orders
-router.get("/", isAdmin, getOrders);
+router.get("/", protect, isAdmin, getOrders);
 
 // Admin + User can get single order
-router.get("/:id", isUser, getOrder);
+router.get("/:id", protect, isUser, getOrder);
 
 // User creates order
-router.post("/", isUser, createOrder);
+router.post("/", protect, isUser, createOrder);
 
 // User marks order as paid
-router.put("/:id/pay", isUser, updateOrderToPaid);
+router.put("/:id/pay", protect, isUser, updateOrderToPaid);
 
 // Admin delivers order
-router.put("/:id/deliver", isAdmin, updateOrderToDelivered);
+router.put("/:id/deliver", protect, isAdmin, updateOrderToDelivered);
 
 module.exports = router;

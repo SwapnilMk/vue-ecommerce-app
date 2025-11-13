@@ -1,46 +1,27 @@
 <script setup lang="ts">
   import { h, resolveComponent, ref, watch } from 'vue'
   import type { TableColumn } from '@nuxt/ui'
-  import { randomInt, randomFrom } from '../../utils'
-  import type { Period, Range, Sale } from '../../types'
+  import { useDashboardData } from '../../composables/useDashboardData'
+  import type { Sale } from '../../types'
 
-  const props = defineProps<{
-    period: Period
-    range: Range
-  }>()
+  const { dashboardData, loading, error } = useDashboardData()
 
   const UBadge = resolveComponent('UBadge')
-
-  const sampleEmails = [
-    'james.anderson@example.com',
-    'mia.white@example.com',
-    'william.brown@example.com',
-    'emma.davis@example.com',
-    'ethan.harris@example.com',
-  ]
 
   const data = ref<Sale[]>([])
 
   watch(
-    [() => props.period, () => props.range],
+    [() => dashboardData.value],
     () => {
-      const sales: Sale[] = []
-      const currentDate = new Date()
+      if (!dashboardData.value) return
 
-      for (let i = 0; i < 5; i++) {
-        const hoursAgo = randomInt(0, 48)
-        const date = new Date(currentDate.getTime() - hoursAgo * 3600000)
-
-        sales.push({
-          id: (4600 - i).toString(),
-          date: date.toISOString(),
-          status: randomFrom(['paid', 'failed', 'refunded']),
-          email: randomFrom(sampleEmails),
-          amount: randomInt(100, 1000),
-        })
-      }
-
-      data.value = sales.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      data.value = dashboardData.value.recentOrders.map((order) => ({
+        id: order._id,
+        date: order.createdAt,
+        status: order.orderStatus.toLowerCase(),
+        email: order.user.name,
+        amount: order.totalAmount,
+      }))
     },
     { immediate: true }
   )
@@ -69,9 +50,9 @@
       header: 'Status',
       cell: ({ row }) => {
         const color = {
-          paid: 'success' as const,
-          failed: 'error' as const,
-          refunded: 'neutral' as const,
+          processing: 'primary' as const,
+          delivered: 'success' as const,
+          cancelled: 'error' as const,
         }[row.getValue('status') as string]
 
         return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
@@ -81,7 +62,7 @@
     },
     {
       accessorKey: 'email',
-      header: 'Email',
+      header: 'Customer',
     },
     {
       accessorKey: 'amount',
@@ -91,7 +72,7 @@
 
         const formatted = new Intl.NumberFormat('en-US', {
           style: 'currency',
-          currency: 'EUR',
+          currency: 'USD',
         }).format(amount)
 
         return h('div', { class: 'text-right font-medium' }, formatted)
@@ -101,7 +82,9 @@
 </script>
 
 <template>
-  <div class="overflow-x-auto">
+  <div v-if="loading">Loading...</div>
+  <div v-else-if="error">{{ error }}</div>
+  <div v-else class="overflow-x-auto">
     <UTable
       :data="data"
       :columns="columns"

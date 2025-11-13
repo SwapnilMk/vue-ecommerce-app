@@ -50,7 +50,7 @@ const getProduct = async (req, res) => {
 // Create a product
 const createProduct = async (req, res) => {
     try {
-        const result = await createProductService(req.body);
+        const result = await createProductService(req.body, req.files);
 
         res.status(201).json({
             success: true,
@@ -70,7 +70,7 @@ const createProduct = async (req, res) => {
 // Update a product
 const updateProduct = async (req, res) => {
     try {
-        const result = await updateProductService(req.params.id, req.body);
+        const result = await updateProductService(req.params.id, req.body, req.files);
 
         res.status(200).json({
             success: true,

@@ -89,7 +89,11 @@
     loading.value = true
     try {
       await authStore.signIn(event.data)
-      router.push('/')
+      if (authStore.user?.role === 'ADMIN') {
+        router.push('/dashboard')
+      } else {
+        router.push('/')
+      }
     } catch (error: any) {
       console.error(error)
       alert(error.message)

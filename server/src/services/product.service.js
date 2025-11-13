@@ -1,8 +1,27 @@
 const Product = require("../models/product.model.js");
+const { uploadToCloudinary } = require("../config/cloudinary.js");
 
 // Create product
-const createProductService = async (data) => {
-    const product = await Product.create(data);
+const createProductService = async (data, files) => {
+    const { name, description, price, category, brand, stock } = data;
+
+    const images = [];
+    if (files) {
+        for (const file of files) {
+            const result = await uploadToCloudinary(file.path);
+            images.push(result.secure_url);
+        }
+    }
+
+    const product = await Product.create({
+        name,
+        description,
+        price,
+        category,
+        brand,
+        stock,
+        images,
+    });
     return { product };
 };
 
@@ -24,11 +43,33 @@ const getProductByIdService = async (id) => {
 };
 
 // Update product
-const updateProductService = async (id, data) => {
-    const updatedProduct = await Product.findByIdAndUpdate(id, data, {
-        new: true,
-        runValidators: true,
-    });
+const updateProductService = async (id, data, files) => {
+    const { name, description, price, category, brand, stock } = data;
+
+    const images = [];
+    if (files) {
+        for (const file of files) {
+            const result = await uploadToCloudinary(file.path);
+            images.push(result.secure_url);
+        }
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+        id,
+        {
+            name,
+            description,
+            price,
+            category,
+            brand,
+            stock,
+            $push: { images: { $each: images } },
+        },
+        {
+            new: true,
+            runValidators: true,
+        }
+    );
 
     if (!updatedProduct) {
         throw new Error("Product not found");
