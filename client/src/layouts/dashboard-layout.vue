@@ -54,10 +54,6 @@
 
           <div class="flex items-center gap-3">
             <UColorModeButton />
-            <UButton color="neutral" variant="ghost" square>
-              <UIcon name="i-lucide-bell" class="size-5" />
-            </UButton>
-
             <UDropdownMenu :items="menuItems" @update:model-value="handleSelect">
               <UAvatar :src="userAvatar" size="md" class="cursor-pointer" />
             </UDropdownMenu>
@@ -112,10 +108,6 @@
         disabled: true,
         value: 'user',
       },
-    ],
-    [
-      { label: 'Profile', icon: 'i-lucide-user', value: 'profile' },
-      { label: 'Settings', icon: 'i-lucide-cog', value: 'settings' },
     ],
     [{ label: 'Logout', icon: 'i-lucide-log-out', value: 'logout' }],
   ]

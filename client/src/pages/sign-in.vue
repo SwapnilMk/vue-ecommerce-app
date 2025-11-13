@@ -10,16 +10,31 @@
       <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
         <!-- Email -->
         <UFormField label="Email" name="email" required>
-          <UInput v-model="state.email" type="email" placeholder="you@example.com" icon="i-heroicons-envelope"
-            class="w-full" />
+          <UInput
+            v-model="state.email"
+            type="email"
+            placeholder="you@example.com"
+            icon="i-heroicons-envelope"
+            class="w-full"
+          />
         </UFormField>
 
         <!-- Password -->
         <UFormField label="Password" name="password" required>
-          <UInput v-model="state.password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••"
-            icon="i-heroicons-lock-closed" class="w-full">
+          <UInput
+            v-model="state.password"
+            :type="showPassword ? 'text' : 'password'"
+            placeholder="••••••••"
+            icon="i-heroicons-lock-closed"
+            class="w-full"
+          >
             <template #trailing>
-              <UButton variant="ghost" color="neutral" size="xs" @click="showPassword = !showPassword">
+              <UButton
+                variant="ghost"
+                color="neutral"
+                size="xs"
+                @click="showPassword = !showPassword"
+              >
                 <UIcon :name="showPassword ? 'i-heroicons-eye-slash' : 'i-heroicons-eye'" />
               </UButton>
             </template>
@@ -46,51 +61,51 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { z } from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
-import { useAuthStore } from '../store/auth'
+  import { reactive, ref } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { z } from 'zod'
+  import type { FormSubmitEvent } from '@nuxt/ui'
+  import { useAuthStore } from '../store/auth'
 
-const schema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-})
+  const schema = z.object({
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+  })
 
-type Schema = z.output<typeof schema>
+  type Schema = z.output<typeof schema>
 
-const state = reactive<Partial<Schema>>({
-  email: '',
-  password: '',
-})
+  const state = reactive<Partial<Schema>>({
+    email: '',
+    password: '',
+  })
 
-const loading = ref(false)
-const showPassword = ref(false)
+  const loading = ref(false)
+  const showPassword = ref(false)
 
-const router = useRouter()
-const authStore = useAuthStore()
+  const router = useRouter()
+  const authStore = useAuthStore()
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  loading.value = true
-  try {
-    await authStore.signIn(event.data)
-    if (authStore.user?.role === 'ADMIN') {
-      router.push('/dashboard')
-    } else {
-      router.push('/')
+  async function onSubmit(event: FormSubmitEvent<Schema>) {
+    loading.value = true
+    try {
+      await authStore.signIn(event.data)
+      if (authStore.user?.role === 'ADMIN') {
+        router.push('/dashboard')
+      } else {
+        router.push('/')
+      }
+    } catch (error: any) {
+      console.error(error)
+      alert(error.message)
+    } finally {
+      loading.value = false
     }
-  } catch (error: any) {
-    console.error(error)
-    alert(error.message)
-  } finally {
-    loading.value = false
   }
-}
 </script>
 
 <style scoped>
-.u-form-field label {
-  font-weight: 500;
-  color: var(--text-muted);
-}
+  .u-form-field label {
+    font-weight: 500;
+    color: var(--text-muted);
+  }
 </style>

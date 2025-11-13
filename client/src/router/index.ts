@@ -8,10 +8,12 @@ const routes = [
     component: () => import('../layouts/main-layout.vue'),
     children: [
       { path: '', name: 'Home', component: () => import('../pages/home.vue') },
+      { path: '/cart', name: 'Cart', component: () => import('../pages/cart/cart.vue') },
       {
-        path: '/cart',
-        name: 'Cart',
-        component: () => import('../pages/cart/cart.vue'),
+        path: '/wishlist',
+        name: 'Wishlist',
+        component: () => import('../pages/wishlist.vue'),
+        meta: { requiresAuth: true },
       },
       {
         path: '/product/:id',
@@ -24,6 +26,19 @@ const routes = [
         name: 'Orders',
         component: () => import('../pages/orders.vue'),
         meta: { requiresAuth: true },
+      },
+      {
+        path: '/orders',
+        name: 'Orders',
+        component: () => import('../pages/orders.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/order/:id',
+        name: 'OrderDetail',
+        component: () => import('../pages/order/[id].vue'),
+        meta: { requiresAuth: true },
+        props: true,
       },
       {
         path: '/profile',
@@ -50,11 +65,11 @@ const routes = [
     ],
   },
 
-  // Admin Dashboard (Protected)
+  // admin routes (protected)
   {
     path: '/dashboard',
     component: () => import('../layouts/dashboard-layout.vue'),
-    meta: { requiresAuth: false, requiresAdmin: false },
+    meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       {
         path: '',
@@ -69,12 +84,17 @@ const routes = [
       {
         path: 'products',
         name: 'DashboardProducts',
-        component: () => import('../pages/products.vue'),
+        component: () => import('../pages/dashboard/products.vue'),
       },
       {
         path: 'orders',
         name: 'DashboardOrders',
-        component: () => import('../pages/orders.vue'),
+        component: () => import('../pages/dashboard/orders.vue'),
+      },
+      {
+        path: 'settings',
+        name: 'DashboardSettings',
+        component: () => import('../pages/dashboard/settings.vue'),
       },
     ],
   },
@@ -92,7 +112,6 @@ const router = createRouter({
   routes,
 })
 
-// ✅ Global Navigation Guard
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
@@ -100,12 +119,22 @@ router.beforeEach((to, from, next) => {
 
   // Not logged in
   if (requiresAuth && !authStore.isAuthenticated) {
-    return next({ name: 'SignIn' })
+    return next({ name: 'SignIn', query: { redirect: to.fullPath } })
   }
 
   // Admin-only route protection
   if (requiresAdmin && authStore.user?.role !== 'ADMIN') {
-    return next({ name: 'Home' }) // redirect non-admins
+    return next({ name: 'Home' })
+  }
+
+  // Redirect to dashboard for admins after login
+  if (to.name === 'SignIn' && authStore.isAuthenticated && authStore.user?.role === 'ADMIN') {
+    return next({ name: 'DashboardHome' })
+  }
+
+  // Redirect to home for users after login
+  if (to.name === 'SignIn' && authStore.isAuthenticated && authStore.user?.role === 'USER') {
+    return next({ name: 'Home' })
   }
 
   next()

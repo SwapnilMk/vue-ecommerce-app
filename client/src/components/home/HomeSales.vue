@@ -1,99 +1,78 @@
 <script setup lang="ts">
-  import { h, resolveComponent, ref, watch } from 'vue'
+  import { h, resolveComponent, ref, onMounted } from 'vue'
   import type { TableColumn } from '@nuxt/ui'
-  import { randomInt, randomFrom } from '../../utils'
-  import type { Period, Range, Sale } from '../../types'
-
-  const props = defineProps<{
-    period: Period
-    range: Range
-  }>()
+  import api from '../../api'
+  import type { Sale } from '../../types'
 
   const UBadge = resolveComponent('UBadge')
 
-  const sampleEmails = [
-    'james.anderson@example.com',
-    'mia.white@example.com',
-    'william.brown@example.com',
-    'emma.davis@example.com',
-    'ethan.harris@example.com',
-  ]
-
   const data = ref<Sale[]>([])
 
-  watch(
-    [() => props.period, () => props.range],
-    () => {
-      const sales: Sale[] = []
-      const currentDate = new Date()
+  async function fetchRecentOrders() {
+    try {
+      const response = await api.get('/orders/all', { params: { limit: 5 } })
+      data.value = response.data.orders.map((order) => ({
+        name: order.user.name, // Map user.name instead of id
+        date: order.createdAt,
+        status: order.paymentStatus.toLowerCase(),
+        email: order.user.email,
+        amount: order.totalAmount,
+      }))
+    } catch (error) {
+      console.error('Failed to fetch recent orders:', error)
+    }
+  }
 
-      for (let i = 0; i < 5; i++) {
-        const hoursAgo = randomInt(0, 48)
-        const date = new Date(currentDate.getTime() - hoursAgo * 3600000)
-
-        sales.push({
-          id: (4600 - i).toString(),
-          date: date.toISOString(),
-          status: randomFrom(['paid', 'failed', 'refunded']),
-          email: randomFrom(sampleEmails),
-          amount: randomInt(100, 1000),
-        })
-      }
-
-      data.value = sales.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    },
-    { immediate: true }
-  )
+  onMounted(() => {
+    fetchRecentOrders()
+  })
 
   const columns: TableColumn<Sale>[] = [
     {
-      accessorKey: 'id',
-      header: 'ID',
-      cell: ({ row }) => `#${row.getValue('id')}`,
+      accessorKey: 'name',
+      header: 'Customer Name',
+      cell: ({ row }) => row.getValue('name'),
     },
     {
       accessorKey: 'date',
       header: 'Date',
       cell: ({ row }) => {
-        return new Date(row.getValue('date')).toLocaleString('en-US', {
+        return new Date(row.getValue('date')).toLocaleString('en-IN', {
           day: 'numeric',
           month: 'short',
           hour: '2-digit',
           minute: '2-digit',
-          hour12: false,
+          hour12: true,
         })
       },
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: 'Payment Status',
       cell: ({ row }) => {
-        const color = {
-          paid: 'success' as const,
-          failed: 'error' as const,
-          refunded: 'neutral' as const,
-        }[row.getValue('status') as string]
-
-        return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-          row.getValue('status')
-        )
+        const status = row.getValue('status') as string
+        const color =
+          {
+            paid: 'green',
+            pending: 'yellow',
+            failed: 'red',
+          }[status] || 'gray'
+        return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () => status)
       },
     },
     {
       accessorKey: 'email',
-      header: 'Email',
+      header: 'Customer Email',
     },
     {
       accessorKey: 'amount',
       header: () => h('div', { class: 'text-right' }, 'Amount'),
       cell: ({ row }) => {
         const amount = Number.parseFloat(row.getValue('amount'))
-
-        const formatted = new Intl.NumberFormat('en-US', {
+        const formatted = new Intl.NumberFormat('en-IN', {
           style: 'currency',
-          currency: 'EUR',
+          currency: 'INR',
         }).format(amount)
-
         return h('div', { class: 'text-right font-medium' }, formatted)
       },
     },

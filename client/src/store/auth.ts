@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import api from '../api'
 
 interface User {
   id: string
@@ -34,37 +35,29 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value && !!user.value)
 
   async function signUp(credentials: SignUpCredentials) {
-    const response = await fetch('http://localhost:5000/api/v1/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials),
-    })
-
-    const data = await response.json()
-    if (!response.ok) throw new Error(data.message || 'Sign-up failed')
-
-    token.value = data.token
-    user.value = data.user
-
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify(data.user))
+    try {
+      const response = await api.post('/users', credentials)
+      const { token: newToken, user: newUser } = response.data
+      token.value = newToken
+      user.value = newUser
+      localStorage.setItem('token', newToken)
+      localStorage.setItem('user', JSON.stringify(newUser))
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Sign-up failed')
+    }
   }
 
   async function signIn(credentials: SignInCredentials) {
-    const response = await fetch('http://localhost:5000/api/v1/users/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials),
-    })
-
-    const data = await response.json()
-    if (!response.ok) throw new Error(data.message || 'Sign-in failed')
-
-    token.value = data.token
-    user.value = data.user
-
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify(data.user))
+    try {
+      const response = await api.post('/users/login', credentials)
+      const { token: newToken, user: newUser } = response.data
+      token.value = newToken
+      user.value = newUser
+      localStorage.setItem('token', newToken)
+      localStorage.setItem('user', JSON.stringify(newUser))
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Sign-in failed')
+    }
   }
 
   function signOut() {

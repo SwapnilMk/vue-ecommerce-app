@@ -2,6 +2,9 @@
   import { ref, shallowRef } from 'vue'
   import { sub } from 'date-fns'
   import type { Period, Range } from '../../types'
+  import HomeStats from '../../components/home/HomeStats.vue'
+  import HomeChart from '../../components/home/HomeChart.vue'
+  import HomeSales from '../../components/home/HomeSales.vue'
 
   const range = shallowRef<Range>({
     start: sub(new Date(), { days: 14 }),

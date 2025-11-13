@@ -13,6 +13,7 @@
   "dependencies": {
     "@nuxt/ui": "^4.1.0",
     "@unovis/vue": "^1.6.2",
+    "axios": "^1.13.2",
     "date-fns": "^4.1.0",
     "lucide-vue-next": "^0.553.0",
     "pinia": "^3.0.4",

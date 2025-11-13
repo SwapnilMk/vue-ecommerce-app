@@ -1,76 +1,45 @@
 <script setup lang="ts">
-  import { ref, watch } from 'vue'
-  import { randomInt } from '../../utils'
-  import type { Period, Range, Stat } from '../../types'
-
-  const props = defineProps<{
-    period: Period
-    range: Range
-  }>()
+  import { ref, onMounted } from 'vue'
+  import api from '../../api'
+  import type { Stat } from '../../types'
 
   function formatCurrency(value: number): string {
-    return value.toLocaleString('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       maximumFractionDigits: 0,
-    })
+    }).format(value)
   }
 
-  const baseStats = [
-    {
-      title: 'Customers',
-      icon: 'i-lucide-users',
-      minValue: 400,
-      maxValue: 1000,
-      minVariation: -15,
-      maxVariation: 25,
-    },
-    {
-      title: 'Conversions',
-      icon: 'i-lucide-chart-pie',
-      minValue: 1000,
-      maxValue: 2000,
-      minVariation: -10,
-      maxVariation: 20,
-    },
-    {
-      title: 'Revenue',
-      icon: 'i-lucide-circle-dollar-sign',
-      minValue: 200000,
-      maxValue: 500000,
-      minVariation: -20,
-      maxVariation: 30,
-      formatter: formatCurrency,
-    },
-    {
-      title: 'Orders',
-      icon: 'i-lucide-shopping-cart',
-      minValue: 100,
-      maxValue: 300,
-      minVariation: -5,
-      maxVariation: 15,
-    },
-  ]
+  const stats = ref<Stat[]>([
+    { title: 'Users', icon: 'i-lucide-users', value: 0 },
+    { title: 'Orders', icon: 'i-lucide-shopping-cart', value: 0 },
+    { title: 'Revenue', icon: 'i-lucide-circle-dollar-sign', value: formatCurrency(0) },
+    { title: 'Products', icon: 'i-lucide-package', value: 0 },
+  ])
 
-  const stats = ref<Stat[]>([])
+  async function fetchStats() {
+    try {
+      const response = await api.get('/dashboard/stats')
+      const { totalUsers, totalOrders, totalRevenue, totalProducts } = response.data
+      stats.value = [
+        { title: 'Users', icon: 'i-lucide-users', value: totalUsers },
+        { title: 'Orders', icon: 'i-lucide-shopping-cart', value: totalOrders },
+        {
+          title: 'Revenue',
+          icon: 'i-lucide-circle-dollar-sign',
+          value: formatCurrency(totalRevenue),
+        },
+        { title: 'Products', icon: 'i-lucide-package', value: totalProducts },
+      ]
+    } catch (error) {
+      console.error('Failed to fetch stats:', error)
+    }
+  }
 
-  watch(
-    [() => props.period, () => props.range],
-    () => {
-      stats.value = baseStats.map((stat) => {
-        const value = randomInt(stat.minValue, stat.maxValue)
-        const variation = randomInt(stat.minVariation, stat.maxVariation)
-
-        return {
-          title: stat.title,
-          icon: stat.icon,
-          value: stat.formatter ? stat.formatter(value) : value,
-          variation,
-        }
-      })
-    },
-    { immediate: true }
-  )
+  onMounted(() => {
+    fetchStats()
+  })
 </script>
 
 <template>
@@ -80,7 +49,14 @@
       :key="index"
       :icon="stat.icon"
       :title="stat.title"
-      to="/customers"
+      :to="
+        {
+          Users: '/dashboard/customers',
+          Orders: '/dashboard/orders',
+          Revenue: '/dashboard/orders',
+          Products: '/dashboard/products',
+        }[stat.title]
+      "
       variant="subtle"
       :ui="{
         container: 'gap-y-1.5',
@@ -94,10 +70,6 @@
         <span class="text-2xl font-semibold text-highlighted">
           {{ stat.value }}
         </span>
-
-        <UBadge :color="stat.variation > 0 ? 'success' : 'error'" variant="subtle" class="text-xs">
-          {{ stat.variation > 0 ? '+' : '' }}{{ stat.variation }}%
-        </UBadge>
       </div>
     </UPageCard>
   </UPageGrid>
