@@ -121,57 +121,57 @@ The `server` directory contains the Node.js backend application.
 
 ### Home Page
 
-![Home Page](./screenshots/homepage.png)
+![Home Page](./client/src/assets//screenshots/homepage.png)
 
 ### Login Page
 
-![Login Page](./screenshots/signin.png)
+![Login Page](./client/src/assets//screenshots/signin.png)
 
 ### Sign Up Page
 
-![Sign Up](./screenshots/signup.png)
+![Sign Up](./client/src/assets//screenshots/signup.png)
 
 ### Product Details
 
-![Product Details](./screenshots/productDetailpage.png)
+![Product Details](./client/src/assets//screenshots/productDetailpage.png)
 
 ### Shopping Cart
 
-![Shopping Cart](./screenshots/cartPage.png)
+![Shopping Cart](./client/src/assets//screenshots/cartPage.png)
 
 ### Wishlist Page
 
-![Wishlist](./screenshots/wishlistpage.png)
+![Wishlist](./client/src/assets//screenshots/wishlistpage.png)
 
 ### Add Product
 
-![Add Product](./screenshots/addProduct.png)
+![Add Product](./client/src/assets//screenshots/addProduct.png)
 
 ### Edit Product
 
-![Edit Product](./screenshots/editProduct.png)
+![Edit Product](./client/src/assets//screenshots/editProduct.png)
 
 ### Admin Dashboard
 
-![Admin Dashboard](./screenshots/adminDashboard.png)
+![Admin Dashboard](./client/src/assets//screenshots/adminDashboard.png)
 
 
 ### Product Management
 
-![Product Management](./screenshots/productManagement.png)
+![Product Management](./client/src/assets//screenshots/productManagement.png)
 
 ### Orders Page
 
-![Orders](./screenshots/orders.png)
+![Orders](./client/src/assets//screenshots/orders.png)
 
 ### Dashboard (User)
 
-![Dashboard User](./screenshots/dashboardUser.png)
+![Dashboard User](./client/src/assets//screenshots/dashboardUser.png)
 
 ### Settings Page
 
-![Settings Page](./screenshots/setting.png)
+![Settings Page](./client/src/assets//screenshots/setting.png)
 
 ### Profile Page
 
-![Profile Page](./screenshots/profile.png)
+![Profile Page](./client/src/assets//screenshots/profile.png)
