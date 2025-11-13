@@ -47,7 +47,18 @@
   const data = ref<Product[]>([])
   const isFetching = ref(false)
   const showAddModal = ref(false)
+  const showEditModal = ref(false)
   const totalProducts = ref(0)
+  const selectedProduct = ref<Product | null>(null)
+
+  const editState = reactive<Partial<Schema>>({
+    name: '',
+    price: 0,
+    stock: 0,
+    category: '',
+    brand: '',
+    description: '',
+  })
 
   async function fetchProducts() {
     isFetching.value = true
@@ -116,6 +127,64 @@
     } catch (error: any) {}
   }
 
+  async function deleteProduct(id: string) {
+    try {
+      await api.delete(`/products/${id}`)
+      data.value = data.value.filter((product) => product.id !== id)
+      totalProducts.value -= 1
+    } catch (error: any) {}
+  }
+
+  function openEditModal(product: Product) {
+    selectedProduct.value = product
+    editState.name = product.name
+    editState.price = product.price
+    editState.stock = product.stock
+    editState.category = product.category
+    editState.brand = product.brand
+    editState.description = product.description
+    showEditModal.value = true
+  }
+
+  async function onUpdate(event: FormSubmitEvent<Schema>) {
+    if (!selectedProduct.value) return
+
+    try {
+      const formData = new FormData()
+      formData.append('name', event.data.name)
+      formData.append('price', event.data.price.toString())
+      formData.append('stock', event.data.stock.toString())
+      formData.append('category', event.data.category)
+      if (event.data.brand) formData.append('brand', event.data.brand)
+      if (event.data.description) formData.append('description', event.data.description)
+      if (imageFiles.value.length > 0) {
+        imageFiles.value.forEach((file) => formData.append('images', file))
+      }
+
+      const response = await api.put(`/products/${selectedProduct.value.id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+
+      const index = data.value.findIndex((p) => p.id === selectedProduct.value?.id)
+      if (index !== -1) {
+        data.value[index] = {
+          id: response.data.product._id,
+          name: response.data.product.name,
+          price: response.data.product.price,
+          stock: response.data.product.stock,
+          category: response.data.product.category,
+          brand: response.data.product.brand || '',
+          images: response.data.product.images || [],
+          description: response.data.product.description || '',
+        }
+      }
+
+      showEditModal.value = false
+      selectedProduct.value = null
+      imageFiles.value = []
+    } catch (error: any) {}
+  }
+
   onMounted(() => {
     fetchProducts()
   })
@@ -134,14 +203,20 @@
       {
         label: 'Edit product',
         icon: 'i-lucide-edit',
-        onSelect() {},
+        onSelect() {
+          openEditModal(row.original)
+        },
       },
       { type: 'separator' },
       {
         label: 'Delete product',
         icon: 'i-lucide-trash',
         color: 'error',
-        onSelect() {},
+        onSelect() {
+          if (confirm('Are you sure you want to delete this product?')) {
+            deleteProduct(row.original.id)
+          }
+        },
       },
     ]
   }
@@ -385,6 +460,48 @@
           <div class="flex justify-end gap-2">
             <UButton type="button" color="gray" @click="showAddModal = false">Cancel</UButton>
             <UButton type="submit" color="primary">Add Product</UButton>
+          </div>
+        </UForm>
+      </template>
+    </UModal>
+    <UModal title="Edit Product" v-model="showEditModal">
+      <template #body>
+        <UForm :schema="schema" :state="editState" class="space-y-4" @submit="onUpdate">
+          <UFormField label="Name" name="name" required>
+            <UInput v-model="editState.name" placeholder="Product name" />
+          </UFormField>
+          <UFormField label="Price" name="price" required>
+            <UInput v-model.number="editState.price" type="number" min="0" placeholder="Price" />
+          </UFormField>
+          <UFormField label="Stock" name="stock" required>
+            <UInput v-model.number="editState.stock" type="number" min="0" placeholder="Stock" />
+          </UFormField>
+          <UFormField label="Category" name="category" required>
+            <USelect
+              v-model="editState.category"
+              :items="categories"
+              placeholder="Select category"
+            />
+          </UFormField>
+          <UFormField label="Brand" name="brand">
+            <UInput v-model="editState.brand" placeholder="Brand name" />
+          </UFormField>
+          <UFormField label="Description" name="description">
+            <UInput v-model="editState.description" placeholder="Description" />
+          </UFormField>
+          <UFormField label="Product Images" name="images">
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              @change="handleImageChange"
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            <p class="mt-1 text-sm text-gray-500">Select one or more images (max 5MB each)</p>
+          </UFormField>
+          <div class="flex justify-end gap-2">
+            <UButton type="button" color="gray" @click="showEditModal = false">Cancel</UButton>
+            <UButton type="submit" color="primary">Update Product</UButton>
           </div>
         </UForm>
       </template>
